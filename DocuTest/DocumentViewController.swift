@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SnapKit
 
 class DocumentViewController: UIViewController {
     
@@ -16,7 +17,7 @@ class DocumentViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
+
         // Access the document
         document?.open(completionHandler: { (success) in
             if success {
@@ -27,10 +28,83 @@ class DocumentViewController: UIViewController {
             }
         })
     }
-    
+
     @IBAction func dismissDocumentViewController() {
         dismiss(animated: true) {
             self.document?.close(completionHandler: nil)
         }
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        createMainInterface()
+    }
+
+    func createMainInterface() {
+        let leftContainer = UIView.init()
+        leftContainer.translatesAutoresizingMaskIntoConstraints = false
+
+        let rightContainer = UIView.init()
+        rightContainer.translatesAutoresizingMaskIntoConstraints = false
+
+        let mainContainer = UIView.init()
+        mainContainer.translatesAutoresizingMaskIntoConstraints = false
+
+        view.addSubview(mainContainer)
+        view.addSubview(leftContainer)
+        view.addSubview(rightContainer)
+
+        leftContainer.snp.makeConstraints { (make) -> Void in
+            make.width.equalTo(view.snp.width).multipliedBy(0.2)
+            make.top.equalTo(view.snp.top)
+            make.bottom.equalTo(view.snp.bottom)
+            make.left.equalTo(view.snp.left)
+        }
+
+        rightContainer.snp.makeConstraints { (make) -> Void in
+            make.width.equalTo(200.0)
+            make.top.equalTo(view.snp.top)
+            make.bottom.equalTo(view.snp.bottom)
+            make.right.equalTo(view.snp.right)
+        }
+
+        mainContainer.snp.makeConstraints { (make) -> Void in
+            make.top.equalTo(view.snp.top)
+            make.bottom.equalTo(view.snp.bottom)
+            make.left.equalTo(leftContainer.snp.right)
+            make.right.equalTo(rightContainer.snp.left)
+        }
+
+        let leftVC = UIViewController.init()
+        let rightVC = ControlsViewController.init()
+        let mainVC = UIViewController.init()
+
+        addChildViewController(leftVC)
+        addChildViewController(rightVC)
+        addChildViewController(mainVC)
+
+        leftContainer.addSubview(leftVC.view)
+        rightContainer.addSubview(rightVC.view)
+        mainContainer.addSubview(mainVC.view)
+
+        leftVC.view.snp.makeConstraints { (make) -> Void in
+            make.edges.equalToSuperview()
+        }
+
+        rightVC.view.snp.makeConstraints { (make) -> Void in
+            make.edges.equalToSuperview()
+        }
+
+        mainVC.view.snp.makeConstraints { (make) -> Void in
+            make.edges.equalToSuperview()
+        }
+
+        leftVC.view.backgroundColor = .gray
+        rightVC.view.backgroundColor = .gray
+        mainVC.view.backgroundColor = .blue
+
+        leftVC.didMove(toParentViewController: self)
+        rightVC.didMove(toParentViewController: self)
+        mainVC.didMove(toParentViewController: self)
     }
 }

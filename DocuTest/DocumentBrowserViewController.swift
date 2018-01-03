@@ -28,6 +28,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         // Specify the allowed content types of your application via the Info.plist.
         
         // Do any additional setup after loading the view, typically from a nib.
+        presentDocument(at: nil)
     }
     
     
@@ -64,11 +65,13 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     
     // MARK: Document Presentation
     
-    func presentDocument(at documentURL: URL) {
+    func presentDocument(at documentURL: URL?) {
         
         let storyBoard = UIStoryboard(name: "Main", bundle: nil)
         let documentViewController = storyBoard.instantiateViewController(withIdentifier: "DocumentViewController") as! DocumentViewController
-        documentViewController.document = Document(fileURL: documentURL)
+        if let documentURL = documentURL {
+            documentViewController.document = Document(fileURL: documentURL)
+        }
         
         present(documentViewController, animated: true, completion: nil)
     }

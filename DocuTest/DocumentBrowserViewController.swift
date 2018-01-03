@@ -18,11 +18,13 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         
         allowsDocumentCreation = true
         allowsPickingMultipleItems = false
+
+        debugPrint(allowedContentTypes)
         
         // Update the style of the UIDocumentBrowserViewController
-        // browserUserInterfaceStyle = .dark
-        // view.tintColor = .white
-        
+         browserUserInterfaceStyle = .dark
+         view.tintColor = UIColor(red: 120.0/255.0, green: 52.0/255.0, blue: 118.0/255.0, alpha: 1.0)
+
         // Specify the allowed content types of your application via the Info.plist.
         
         // Do any additional setup after loading the view, typically from a nib.
@@ -32,12 +34,12 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     // MARK: UIDocumentBrowserViewControllerDelegate
     
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
-        let newDocumentURL: URL? = nil
-        
+        let newDocumentURL = Bundle.main.url(forResource: "EmptyProject", withExtension: "creo")
+
         // Set the URL for the new document here. Optionally, you can present a template chooser before calling the importHandler.
         // Make sure the importHandler is always called, even if the user cancels the creation request.
         if newDocumentURL != nil {
-            importHandler(newDocumentURL, .move)
+            importHandler(newDocumentURL, .copy)
         } else {
             importHandler(nil, .none)
         }

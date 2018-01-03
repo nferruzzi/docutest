@@ -55,7 +55,7 @@ class DocumentViewController: UIViewController {
         view.addSubview(rightContainer)
 
         leftContainer.snp.makeConstraints { (make) -> Void in
-            make.width.equalTo(view.snp.width).multipliedBy(0.2)
+            make.width.equalTo(50.0)
             make.top.equalTo(view.snp.top)
             make.bottom.equalTo(view.snp.bottom)
             make.left.equalTo(view.snp.left)
@@ -101,7 +101,7 @@ class DocumentViewController: UIViewController {
 
         leftVC.view.backgroundColor = .gray
         rightVC.view.backgroundColor = .gray
-        mainVC.view.backgroundColor = .blue
+        mainVC.view.backgroundColor = .darkGray
 
         leftVC.didMove(toParentViewController: self)
         rightVC.didMove(toParentViewController: self)

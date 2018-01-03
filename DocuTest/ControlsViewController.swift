@@ -57,6 +57,7 @@ class ControlsViewController: UIViewController, UICollectionViewDataSource, UICo
         cv.delegate = self
         cv.dragDelegate = self
         cv.dragInteractionEnabled = true
+        cv.backgroundColor = .clear
         cv.register(RectCollectionViewCell.self, forCellWithReuseIdentifier: "rect")
         return cv
     }()

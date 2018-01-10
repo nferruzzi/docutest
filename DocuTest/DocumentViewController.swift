@@ -75,7 +75,7 @@ class DocumentViewController: UIViewController {
             make.right.equalTo(rightContainer.snp.left)
         }
 
-        let leftVC = UIViewController.init()
+        let leftVC = SidebarViewController.init()
         let rightVC = ControlsViewController.init()
         let mainVC = CanvasViewController.init()
 

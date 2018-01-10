@@ -18,7 +18,10 @@ class CanvasViewController: UIViewController, UIScrollViewDelegate {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-//        automaticallyAdjustsScrollViewInsets = false
+
+        view.layer.borderColor = UIColor.black.cgColor
+        view.layer.borderWidth = 1.0
+
         scrollView = UIScrollView.init()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
@@ -77,14 +80,12 @@ extension CanvasViewController: UIDropInteractionDelegate {
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
         debugPrint("session did update")
-//        let dropLocation = session.location(in: view)
         let operation: UIDropOperation
         operation = .copy
         return UIDropProposal(operation: operation)
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
-        // Consume drag items (in this example, of type UIImage).
         debugPrint("perform drop")
         session.loadObjects(ofClass: UIImage.self){ [weak self](imageItems) in
             guard let wself = self else { return }
@@ -98,19 +99,7 @@ extension CanvasViewController: UIDropInteractionDelegate {
                     make.top.equalToSuperview().offset(dropLocation.y - image.size.height/2)
                 })
             }
-//
-//            /*
-//             If you do not employ the loadObjects(ofClass:completion:) convenience
-//             method of the UIDropSession class, which automatically employs
-//             the main thread, explicitly dispatch UI work to the main thread.
-//             For example, you can use `DispatchQueue.main.async` method.
-//             */
-//            self.imageView.image = images.first
             debugPrint("load object")
         }
-
-        // Perform additional UI updates as needed.
-        let dropLocation = session.location(in: view)
-//        updateLayers(forDropLocation: dropLocation)
     }
 }

@@ -18,6 +18,7 @@
 		8A68C1591FFBEF9F001F4E70 /* DocuTestUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68C1581FFBEF9F001F4E70 /* DocuTestUITests.swift */; };
 		8A68C1671FFBF9F1001F4E70 /* EmptyProject.creo in Resources */ = {isa = PBXBuildFile; fileRef = 8A68C1661FFBF9F1001F4E70 /* EmptyProject.creo */; };
 		8AB025EA20060E4B00D48FDB /* CanvasViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB025E920060E4B00D48FDB /* CanvasViewController.swift */; };
+		8AB025EF2006530900D48FDB /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB025EE2006530900D48FDB /* SidebarViewController.swift */; };
 		8ABE37EE1FFD3456006455B1 /* ControlsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABE37ED1FFD3456006455B1 /* ControlsViewController.swift */; };
 		92FA1F42DF170169D9A6CD9D /* Pods_DocuTestTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AC5A5D13F218F911A64E61F8 /* Pods_DocuTestTests.framework */; };
 		937567D2901DC87AB259BD4B /* Pods_DocuTestUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AE21C07591188B6A2FFB0862 /* Pods_DocuTestUITests.framework */; };
@@ -63,6 +64,7 @@
 		8A68C1661FFBF9F1001F4E70 /* EmptyProject.creo */ = {isa = PBXFileReference; lastKnownFileType = text; path = EmptyProject.creo; sourceTree = "<group>"; };
 		8A68C1681FFBFF18001F4E70 /* DocuTest.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DocuTest.entitlements; sourceTree = "<group>"; };
 		8AB025E920060E4B00D48FDB /* CanvasViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewController.swift; sourceTree = "<group>"; };
+		8AB025EE2006530900D48FDB /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
 		8ABE37ED1FFD3456006455B1 /* ControlsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlsViewController.swift; sourceTree = "<group>"; };
 		A226E2FC89C0986D65E25C39 /* Pods-DocuTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DocuTest.release.xcconfig"; path = "Pods/Target Support Files/Pods-DocuTest/Pods-DocuTest.release.xcconfig"; sourceTree = "<group>"; };
 		A4165A8B32EC5F9362831306 /* Pods-DocuTestTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DocuTestTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-DocuTestTests/Pods-DocuTestTests.debug.xcconfig"; sourceTree = "<group>"; };
@@ -150,6 +152,7 @@
 				8A68C1661FFBF9F1001F4E70 /* EmptyProject.creo */,
 				8ABE37ED1FFD3456006455B1 /* ControlsViewController.swift */,
 				8AB025E920060E4B00D48FDB /* CanvasViewController.swift */,
+				8AB025EE2006530900D48FDB /* SidebarViewController.swift */,
 			);
 			path = DocuTest;
 			sourceTree = "<group>";
@@ -493,6 +496,7 @@
 				8ABE37EE1FFD3456006455B1 /* ControlsViewController.swift in Sources */,
 				8AB025EA20060E4B00D48FDB /* CanvasViewController.swift in Sources */,
 				8A68C1351FFBEF9F001F4E70 /* AppDelegate.swift in Sources */,
+				8AB025EF2006530900D48FDB /* SidebarViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

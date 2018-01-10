@@ -62,12 +62,12 @@ class ControlsViewController: UIViewController, UICollectionViewDataSource, UICo
     }()
 
     lazy var datasource: [DraggableControl] = {
-        let ds: [DraggableControl] = [
+        [
             ControlImageView.init(),
             ControlButtonView.init(),
-            ControlLabelView.init()
+            ControlLabelView.init(),
+            ControlWebView.init()
         ]
-        return ds
     }()
 
     override func viewDidLoad() {

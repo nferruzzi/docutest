@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import WebKit
 
 class ControlImageView: DraggabeViewControl<UIImageView> {
 
@@ -22,8 +23,9 @@ class ControlImageView: DraggabeViewControl<UIImageView> {
         return "MKImageView_drag"
     }
 
-    override func configure(view: UIImageView) {
+    override func configure(view: UIImageView) -> CGSize? {
         view.image = image
+        return nil
     }
 
 }
@@ -38,8 +40,9 @@ class ControlButtonView: DraggabeViewControl<UIButton> {
         return "MKButton_drag"
     }
 
-    override func configure(view: UIButton) {
+    override func configure(view: UIButton)  -> CGSize? {
         view.setTitle("Button", for: .normal)
+        return nil
     }
 
 }
@@ -54,8 +57,28 @@ class ControlLabelView: DraggabeViewControl<UILabel> {
         return "MKLabel_drag"
     }
 
-    override func configure(view: UILabel) {
+    override func configure(view: UILabel) -> CGSize? {
         view.text = "Label"
+        return nil
+    }
+
+}
+
+class ControlWebView: DraggabeViewControl<WKWebView> {
+
+    override func iconName() -> String {
+        return "MKWebView_iOS7_"
+    }
+
+    override func dragItemName() -> String {
+        return "MKWebView_drag"
+    }
+
+    override func configure(view: WKWebView) -> CGSize? {
+        let url = URL.init(string: "https://www.creolabs.com")
+        let req = URLRequest.init(url: url!)
+        view.load(req)
+        return CGSize.init(width: 400, height: 400)
     }
 
 }

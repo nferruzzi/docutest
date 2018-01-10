@@ -108,12 +108,16 @@ extension CanvasViewController: UIDropInteractionDelegate {
         let dropLocation = session.location(in: canvasView)
 
         if let lo = item.localObject as? DraggableControl {
-            let view = lo.createCanvasView()
+            let (view, size) = lo.createCanvasView()
             canvasView.addSubview(view)
 
             view.snp.makeConstraints({ (make) in
                 make.left.equalToSuperview().offset(dropLocation.x - view.frame.size.width/2)
                 make.top.equalToSuperview().offset(dropLocation.y - view.frame.size.height/2)
+                if let size = size {
+                    make.width.equalTo(size.width)
+                    make.height.equalTo(size.height)
+                }
             })
 
             debugPrint("drop internal object")

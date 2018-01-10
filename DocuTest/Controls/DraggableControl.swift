@@ -9,12 +9,12 @@
 import UIKit
 
 protocol DraggableControl {
-    func createCanvasView() -> UIView
+    func createCanvasView() -> (UIView, CGSize?)
     func icon() -> UIImageView
     func dragItems() -> [UIDragItem]
 }
 
-class DraggabeViewControl<T:UIView>: NSObject, DraggableControl {
+class DraggabeViewControl<T:UIView>: DraggableControl {
 
     func iconName() -> String {
         fatalError("iconName() has not been implemented")
@@ -24,14 +24,15 @@ class DraggabeViewControl<T:UIView>: NSObject, DraggableControl {
         fatalError("dragItemName() has not been implemented")
     }
 
-    func configure(view: T) {
+    func configure(view: T) -> CGSize? {
+        return nil
     }
 
-    func createCanvasView() -> UIView {
+    func createCanvasView() -> (UIView, CGSize?) {
         let instance = T.init()
         instance.translatesAutoresizingMaskIntoConstraints = false
-        configure(view: instance)
-        return instance
+        let size = configure(view: instance)
+        return (instance, size)
     }
 
     func icon() -> UIImageView {

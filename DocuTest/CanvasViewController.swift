@@ -75,7 +75,23 @@ class CanvasViewController: UIViewController, UIScrollViewDelegate {
 extension CanvasViewController: UIDropInteractionDelegate {
 
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        return session.hasItemsConforming(toTypeIdentifiers: [kUTTypeImage as String]) && session.items.count == 1
+        // avoid complications
+        if session.items.count != 1 { return false }
+
+        // just 1 for now
+        guard let item = session.items.first else { return false }
+
+        // control from the collection view
+        if let _ = item.localObject as? DraggableControl {
+            return true
+        }
+
+        // incoming external image
+        if item.itemProvider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) {
+            return true
+        }
+
+        return false
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
@@ -87,19 +103,34 @@ extension CanvasViewController: UIDropInteractionDelegate {
 
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         debugPrint("perform drop")
-        session.loadObjects(ofClass: UIImage.self){ [weak self](imageItems) in
-            guard let wself = self else { return }
-            let dropLocation = session.location(in: wself.canvasView)
-            let images = imageItems as! [UIImage]
-            for image in images {
-                let iv = UIImageView.init(image: image)
-                wself.canvasView.addSubview(iv)
-                iv.snp.makeConstraints({ (make) in
-                    make.left.equalToSuperview().offset(dropLocation.x - image.size.width/2)
-                    make.top.equalToSuperview().offset(dropLocation.y - image.size.height/2)
-                })
+
+        guard let item = session.items.first else { fatalError("UHM") }
+        let dropLocation = session.location(in: canvasView)
+
+        if let lo = item.localObject as? DraggableControl {
+            let view = lo.createCanvasView()
+            canvasView.addSubview(view)
+
+            view.snp.makeConstraints({ (make) in
+                make.left.equalToSuperview().offset(dropLocation.x - view.frame.size.width/2)
+                make.top.equalToSuperview().offset(dropLocation.y - view.frame.size.height/2)
+            })
+
+            debugPrint("drop internal object")
+        } else {
+            session.loadObjects(ofClass: UIImage.self){ [weak self](imageItems) in
+                guard let wself = self else { return }
+                let images = imageItems as! [UIImage]
+                for image in images {
+                    let iv = UIImageView.init(image: image)
+                    wself.canvasView.addSubview(iv)
+                    iv.snp.makeConstraints({ (make) in
+                        make.left.equalToSuperview().offset(dropLocation.x - image.size.width/2)
+                        make.top.equalToSuperview().offset(dropLocation.y - image.size.height/2)
+                    })
+                }
+                debugPrint("load external object")
             }
-            debugPrint("load object")
         }
     }
 }

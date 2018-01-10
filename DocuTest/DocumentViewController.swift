@@ -77,7 +77,7 @@ class DocumentViewController: UIViewController {
 
         let leftVC = UIViewController.init()
         let rightVC = ControlsViewController.init()
-        let mainVC = UIViewController.init()
+        let mainVC = CanvasViewController.init()
 
         addChildViewController(leftVC)
         addChildViewController(rightVC)

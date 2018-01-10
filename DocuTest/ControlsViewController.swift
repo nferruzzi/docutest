@@ -11,7 +11,7 @@ import SnapKit
 
 class RectCollectionViewCell: UICollectionViewCell {
 
-    open var icon: UIImageView!
+    open var icon: UIImageView?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -21,21 +21,24 @@ class RectCollectionViewCell: UICollectionViewCell {
     }
 
     func build() {
+        if icon != nil { return }
         let img = UIImage.animatedImageNamed("MKButton_iOS7_", duration: 1.0)
         icon = UIImageView.init(image: img)
-        icon.translatesAutoresizingMaskIntoConstraints = false
-        icon.contentMode = .scaleAspectFit
-        contentView.addSubview(icon)
-        icon.snp.makeConstraints { (make) -> Void in
-            let w = (200.0/2.0)-6
-            make.width.equalTo(w)
-            make.height.equalTo(w)
-            make.edges.equalToSuperview().inset(1)
+        if let icon = icon {
+            icon.translatesAutoresizingMaskIntoConstraints = false
+            icon.contentMode = .scaleAspectFit
+            contentView.addSubview(icon)
+            icon.snp.makeConstraints { (make) -> Void in
+                let w = (200.0/2.0)-6
+                make.width.equalTo(w)
+                make.height.equalTo(w)
+                make.edges.equalToSuperview().inset(1)
+            }
         }
     }
 
     override func prepareForReuse() {
-        contentView.subviews.forEach() { $0.removeFromSuperview() }
+//        icon?.removeFromSuperview()
     }
 
     required init?(coder aDecoder: NSCoder) {

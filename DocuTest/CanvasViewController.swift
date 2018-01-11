@@ -10,7 +10,56 @@ import UIKit
 import SnapKit
 import MobileCoreServices
 
-class CanvasViewController: UIViewController, UIScrollViewDelegate {
+class CanvasItem: UIView {
+
+    private weak var guideView: UIView!
+    private var token: NSKeyValueObservation!
+
+    init() {
+        super.init(frame: .zero)
+        let gv = UIView.init()
+        gv.translatesAutoresizingMaskIntoConstraints = false
+        gv.isUserInteractionEnabled = false
+        gv.backgroundColor = .black
+        gv.alpha = 0.2
+        super.addSubview(gv)
+        guideView = gv
+        guideView.snp.makeConstraints { (make) in
+            make.edges.equalToSuperview()
+        }
+        layer.borderWidth = 2.0
+        layer.borderColor = UIColor.blue.cgColor
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func addSubview(_ view: UIView) {
+        insertSubview(view, belowSubview: guideView)
+    }
+
+    override func didMoveToSuperview() {
+        var sp = superview
+        while !(sp is CanvasScrollView) && sp != nil{
+            sp = sp?.superview
+        }
+        if let sp = sp as? CanvasScrollView {
+            token = sp.observe(\.zoomScaleDelegate) { [weak self](scrollView: CanvasScrollView, _) in
+                guard let wself = self else { return }
+                wself.layer.borderWidth = 2.0 * 1.0 / scrollView.zoomScale
+                wself.setNeedsDisplay()
+            }
+        }
+     }
+
+}
+
+class CanvasScrollView: UIScrollView {
+    @objc dynamic var zoomScaleDelegate: NSNumber?
+}
+
+class CanvasViewController: UIViewController {
 
     var scrollView: UIScrollView!
     var contentView: UIView!
@@ -22,7 +71,7 @@ class CanvasViewController: UIViewController, UIScrollViewDelegate {
         view.layer.borderColor = UIColor.black.cgColor
         view.layer.borderWidth = 1.0
 
-        scrollView = UIScrollView.init()
+        scrollView = CanvasScrollView.init()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(scrollView)
         scrollView.snp.makeConstraints { (make) in
@@ -59,6 +108,23 @@ class CanvasViewController: UIViewController, UIScrollViewDelegate {
             make.top.equalToSuperview().offset(50)
         }
 
+//        if navigationController == nil {
+//            let inception = DocumentViewController.init()
+//            let nav = UINavigationController.init(rootViewController: inception)
+//            addChildViewController(nav)
+//            addItem(view: nav.view, location: CGPoint.init(x: 250, y: 250), size: CGSize.init(width: 500, height: 500))
+//            nav.didMove(toParentViewController: self)
+//        }
+//
+//        if tabBarController == nil {
+//            let inception = DocumentViewController.init()
+//            let tb = UITabBarController.init()
+//            tb.viewControllers = [inception]
+//            addChildViewController(tb)
+//            addItem(view: tb.view, location: CGPoint.init(x: 250, y: 800), size: CGSize.init(width: 500, height: 500))
+//            tb.didMove(toParentViewController: self)
+//        }
+
         let dropInteraction = UIDropInteraction(delegate: self)
         canvasView.addInteraction(dropInteraction)
     }
@@ -67,8 +133,18 @@ class CanvasViewController: UIViewController, UIScrollViewDelegate {
         super.didReceiveMemoryWarning()
     }
 
+}
+
+extension CanvasViewController: UIScrollViewDelegate {
+
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return contentView
+    }
+
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        if let csv = scrollView as? CanvasScrollView {
+            csv.zoomScaleDelegate = NSNumber.init(value: Float(scrollView.zoomScale))
+        }
     }
 }
 
@@ -101,6 +177,26 @@ extension CanvasViewController: UIDropInteractionDelegate {
         return UIDropProposal(operation: operation)
     }
 
+    func addItem(view: UIView, location: CGPoint, size: CGSize?) {
+        let canvasItem = CanvasItem.init()
+        canvasItem.addSubview(view)
+        view.snp.makeConstraints({ (make) in
+            make.edges.equalToSuperview()
+        })
+        canvasView.addSubview(canvasItem)
+        canvasItem.snp.makeConstraints({ (make) in
+            if let size = size {
+                make.left.equalToSuperview().offset(location.x - size.width/2)
+                make.top.equalToSuperview().offset(location.y - size.height/2)
+                make.width.equalTo(size.width)
+                make.height.equalTo(size.height)
+            } else {
+                make.left.equalToSuperview().offset(location.x)
+                make.top.equalToSuperview().offset(location.y)
+            }
+        })
+    }
+
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         debugPrint("perform drop")
 
@@ -109,17 +205,7 @@ extension CanvasViewController: UIDropInteractionDelegate {
 
         if let lo = item.localObject as? DraggableControl {
             let (view, size) = lo.createCanvasView()
-            canvasView.addSubview(view)
-
-            view.snp.makeConstraints({ (make) in
-                make.left.equalToSuperview().offset(dropLocation.x - view.frame.size.width/2)
-                make.top.equalToSuperview().offset(dropLocation.y - view.frame.size.height/2)
-                if let size = size {
-                    make.width.equalTo(size.width)
-                    make.height.equalTo(size.height)
-                }
-            })
-
+            addItem(view: view, location: dropLocation, size: size)
             debugPrint("drop internal object")
         } else {
             session.loadObjects(ofClass: UIImage.self){ [weak self](imageItems) in
@@ -127,11 +213,8 @@ extension CanvasViewController: UIDropInteractionDelegate {
                 let images = imageItems as! [UIImage]
                 for image in images {
                     let iv = UIImageView.init(image: image)
-                    wself.canvasView.addSubview(iv)
-                    iv.snp.makeConstraints({ (make) in
-                        make.left.equalToSuperview().offset(dropLocation.x - image.size.width/2)
-                        make.top.equalToSuperview().offset(dropLocation.y - image.size.height/2)
-                    })
+                    let location = CGPoint.init(x: dropLocation.x - image.size.width/2, y: dropLocation.y - image.size.height/2)
+                    wself.addItem(view: iv, location: location, size: nil)
                 }
                 debugPrint("load external object")
             }

@@ -10,25 +10,86 @@ import UIKit
 import SnapKit
 import MobileCoreServices
 
+class CanvasGuideView: UIView {
+    // DO NOT SET THE BACKGROUNDCOLOR
+    var borderColor = UIColor.blue
+    var borderWidth: CGFloat = 2.0
+    var controlSize: CGFloat = 15.0
+    lazy var controlLayers = {
+        [CALayer.init(), CALayer.init(), CALayer.init()]
+    }()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isOpaque = false
+        clipsToBounds = false
+
+        for cl in controlLayers {
+            cl.anchorPoint = CGPoint.init(x: 0.5, y: 0.5)
+            cl.bounds = CGRect.init(x: 0, y: 0, width: controlSize, height: controlSize)
+            cl.backgroundColor = UIColor.purple.cgColor
+            layer.addSublayer(cl)
+        }
+    }
+
+    override func layoutSublayers(of layer: CALayer) {
+        controlLayers[0].position = CGPoint.init(x: 0.0, y: frame.size.height)
+        controlLayers[1].position = CGPoint.init(x: frame.size.width/2.0, y: frame.size.height)
+        controlLayers[2].position = CGPoint.init(x: frame.size.width, y: frame.size.height)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func draw(_ rect: CGRect) {
+        borderColor.setFill()
+        UIRectFill(rect)
+        let inside = frame.insetBy(dx: borderWidth, dy: borderWidth)
+        UIColor.clear.setFill()
+        UIRectFillUsingBlendMode(inside, .clear)
+    }
+
+}
+
 class CanvasItem: UIView {
 
     private weak var guideView: UIView!
     private var token: NSKeyValueObservation!
+    private var selected: Bool = false {
+        didSet {
+            guard let canvasScrollView = canvasScrollView else { return }
+            let val:CGFloat = selected ? 2.0 : 0.0
+            layer.borderWidth = val / canvasScrollView.zoomScale
+            setNeedsDisplay()
+        }
+    }
+    private var canvasScrollView: CanvasScrollView!
+    private var moveDelta: CGPoint!
 
     init() {
         super.init(frame: .zero)
-        let gv = UIView.init()
+        isOpaque = false
+        backgroundColor = .red
+        let gv = CanvasGuideView.init(frame: CGRect.zero)
         gv.translatesAutoresizingMaskIntoConstraints = false
         gv.isUserInteractionEnabled = false
-        gv.backgroundColor = .black
-        gv.alpha = 0.2
+        gv.backgroundColor = .clear
         super.addSubview(gv)
         guideView = gv
         guideView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
         }
-        layer.borderWidth = 2.0
         layer.borderColor = UIColor.blue.cgColor
+        let tap = UITapGestureRecognizer.init(target: self, action: #selector(CanvasItem.onTap(_:)))
+        addGestureRecognizer(tap)
+
+//        let dragInteraction = UIDragInteraction(delegate: self)
+//        addInteraction(dragInteraction)
+
+        let gesture = UIPanGestureRecognizer(target: self, action: #selector(CanvasItem.wasDragged(_:)))
+        addGestureRecognizer(gesture)
+        gesture.delegate = self
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -45,16 +106,68 @@ class CanvasItem: UIView {
             sp = sp?.superview
         }
         if let sp = sp as? CanvasScrollView {
-            token = sp.observe(\.zoomScaleDelegate) { [weak self](scrollView: CanvasScrollView, _) in
+            canvasScrollView = sp
+            token = sp.observe(\.zoomScaleDelegate, options: [.new, .initial]) { [weak self](scrollView: CanvasScrollView, _) in
                 guard let wself = self else { return }
-                wself.layer.borderWidth = 2.0 * 1.0 / scrollView.zoomScale
-                wself.setNeedsDisplay()
+                wself.selected = wself.selected ? true : false
             }
         }
-     }
+    }
+
+    @objc func onTap(_ gesture: UITapGestureRecognizer) {
+        selected = selected ? false : true
+    }
 
 }
 
+// MARK: - Pan delegate
+extension CanvasItem: UIGestureRecognizerDelegate {
+
+    @objc func wasDragged(_ gestureRecognizer: UIPanGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .began:
+            moveDelta = frame.origin
+        case .changed:
+            let translation = gestureRecognizer.translation(in: superview)
+            snp.updateConstraints({ (make) in
+                make.left.equalTo(max(moveDelta.x + translation.x, 0.0))
+                make.top.equalTo(max(moveDelta.y + translation.y, 0.0))
+            })
+        default: ()
+        }
+    }
+
+}
+
+// MARK: - Drag interaction delegate
+extension CanvasItem: UIDragInteractionDelegate {
+
+    func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
+        let itemProvider = NSItemProvider(object:"CanvasItem" as NSString)
+        let dragItem = UIDragItem.init(itemProvider: itemProvider)
+        dragItem.localObject = self
+
+        UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0.0)
+        let context = UIGraphicsGetCurrentContext()
+        layer.render(in: context!)
+        let snapshotImage = UIGraphicsGetImageFromCurrentImageContext()
+        let preview = UIImageView.init(image: snapshotImage)
+        let previewParameters = UIDragPreview.init(view: preview)
+
+        dragItem.previewProvider = { () -> UIDragPreview? in
+            return previewParameters
+        }
+
+        return [dragItem]
+    }
+
+    func dragInteraction(_ interaction: UIDragInteraction, prefersFullSizePreviewsFor session: UIDragSession) -> Bool {
+        return true
+    }
+
+}
+
+// MARK: CanvasViewController and CanvasScrollView child
 class CanvasScrollView: UIScrollView {
     @objc dynamic var zoomScaleDelegate: NSNumber?
 }
@@ -108,11 +221,12 @@ class CanvasViewController: UIViewController {
             make.top.equalToSuperview().offset(50)
         }
 
+        // INCEPTION
 //        if navigationController == nil {
 //            let inception = DocumentViewController.init()
 //            let nav = UINavigationController.init(rootViewController: inception)
 //            addChildViewController(nav)
-//            addItem(view: nav.view, location: CGPoint.init(x: 250, y: 250), size: CGSize.init(width: 500, height: 500))
+//            add(view: nav.view, location: CGPoint.init(x: 250, y: 250), size: CGSize.init(width: 500, height: 200))
 //            nav.didMove(toParentViewController: self)
 //        }
 //
@@ -121,7 +235,7 @@ class CanvasViewController: UIViewController {
 //            let tb = UITabBarController.init()
 //            tb.viewControllers = [inception]
 //            addChildViewController(tb)
-//            addItem(view: tb.view, location: CGPoint.init(x: 250, y: 800), size: CGSize.init(width: 500, height: 500))
+//            add(view: tb.view, location: CGPoint.init(x: 250, y: 800), size: CGSize.init(width: 500, height: 200))
 //            tb.didMove(toParentViewController: self)
 //        }
 
@@ -135,49 +249,10 @@ class CanvasViewController: UIViewController {
 
 }
 
-extension CanvasViewController: UIScrollViewDelegate {
+// MARK: - manage canvas items
+extension CanvasViewController {
 
-    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return contentView
-    }
-
-    func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        if let csv = scrollView as? CanvasScrollView {
-            csv.zoomScaleDelegate = NSNumber.init(value: Float(scrollView.zoomScale))
-        }
-    }
-}
-
-extension CanvasViewController: UIDropInteractionDelegate {
-
-    func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        // avoid complications
-        if session.items.count != 1 { return false }
-
-        // just 1 for now
-        guard let item = session.items.first else { return false }
-
-        // control from the collection view
-        if let _ = item.localObject as? DraggableControl {
-            return true
-        }
-
-        // incoming external image
-        if item.itemProvider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) {
-            return true
-        }
-
-        return false
-    }
-
-    func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
-        debugPrint("session did update")
-        let operation: UIDropOperation
-        operation = .copy
-        return UIDropProposal(operation: operation)
-    }
-
-    func addItem(view: UIView, location: CGPoint, size: CGSize?) {
+    func add(view: UIView, location: CGPoint, size: CGSize?) {
         let canvasItem = CanvasItem.init()
         canvasItem.addSubview(view)
         view.snp.makeConstraints({ (make) in
@@ -197,26 +272,83 @@ extension CanvasViewController: UIDropInteractionDelegate {
         })
     }
 
-    func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
-        debugPrint("perform drop")
+    func move(canvas: CanvasItem, location: CGPoint) {
+        canvas.snp.updateConstraints { (make) in
+            make.left.equalToSuperview().offset(location.x)
+            make.top.equalToSuperview().offset(location.y)
+        }
+    }
+}
 
+// MARK: - scroll view delegate
+extension CanvasViewController: UIScrollViewDelegate {
+
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        return contentView
+    }
+
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
+        guard let csv = scrollView as? CanvasScrollView else { return }
+        csv.zoomScaleDelegate = NSNumber.init(value: Float(scrollView.zoomScale))
+    }
+
+}
+
+// MARK: - drop interaction  delegate
+extension CanvasViewController: UIDropInteractionDelegate {
+
+    func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
+        // avoid complications
+        if session.items.count != 1 { return false }
+        guard let item = session.items.first else { return false }
+
+        switch item.localObject {
+        case is CanvasItem:
+            return true
+        case is DraggableControl:
+            return true
+        default: ()
+        }
+
+        // incoming external image
+        if item.itemProvider.hasItemConformingToTypeIdentifier(kUTTypeImage as String) {
+            return true
+        }
+
+        return false
+    }
+
+    func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
         guard let item = session.items.first else { fatalError("UHM") }
+        let operation: UIDropOperation
+        operation = (item.localObject ?? nil) is CanvasItem ? .move : .copy
+        let proposal = UIDropProposal(operation: operation)
+        proposal.isPrecise = true
+        proposal.prefersFullSizePreview = true
+        return proposal
+    }
+
+    func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
+        guard let item = session.items.first else { return }
         let dropLocation = session.location(in: canvasView)
 
-        if let lo = item.localObject as? DraggableControl {
+        switch item.localObject {
+        case .some(let lo as CanvasItem):
+            move(canvas: lo, location: dropLocation)
+        case .some(let lo as DraggableControl):
             let (view, size) = lo.createCanvasView()
-            addItem(view: view, location: dropLocation, size: size)
-            debugPrint("drop internal object")
-        } else {
+            add(view: view, location: dropLocation, size: size)
+        default:
             session.loadObjects(ofClass: UIImage.self){ [weak self](imageItems) in
                 guard let wself = self else { return }
-                let images = imageItems as! [UIImage]
-                for image in images {
-                    let iv = UIImageView.init(image: image)
-                    let location = CGPoint.init(x: dropLocation.x - image.size.width/2, y: dropLocation.y - image.size.height/2)
-                    wself.addItem(view: iv, location: location, size: nil)
+                DispatchQueue.main.async {
+                    let images = imageItems as! [UIImage]
+                    for image in images {
+                        let iv = UIImageView.init(image: image)
+                        let location = CGPoint.init(x: dropLocation.x - image.size.width/2, y: dropLocation.y - image.size.height/2)
+                        wself.add(view: iv, location: location, size: nil)
+                    }
                 }
-                debugPrint("load external object")
             }
         }
     }

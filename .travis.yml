@@ -1,0 +1,8 @@
+language: swift
+osx_image: xcode9
+install:
+- gem install xcpretty
+- gem install cocoapods --pre
+script:
+- pod update
+- set -o pipefail && xcodebuild -workspace DocuTest.xcworkspace -scheme 'DocuTest' -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (2nd generation)' | xcpretty -c

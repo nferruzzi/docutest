@@ -13,7 +13,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.view.accessibilityIdentifier = "document browser"
         delegate = self
         
         allowsDocumentCreation = true

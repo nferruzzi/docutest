@@ -16,6 +16,10 @@ target 'DocuTest' do
   target 'DocuTestUITests' do
     inherit! :search_paths
     # Pods for testing
+    pod 'Quick'
+    pod 'Nimble'
+    pod 'FBSnapshotTestCase'
+    pod 'Nimble-Snapshots'
   end
 
 end

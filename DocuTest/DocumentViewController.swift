@@ -14,7 +14,7 @@ class DocumentViewController: UIViewController {
     @IBOutlet weak var documentNameLabel: UILabel!
     
     var document: UIDocument?
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
@@ -37,6 +37,7 @@ class DocumentViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.accessibilityIdentifier = "document"
         createMainInterface()
     }
 

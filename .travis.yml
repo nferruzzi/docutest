@@ -7,5 +7,18 @@ install:
 script:
 - pod install
 - xcrun simctl list
-- set -o pipefail && xcodebuild -workspace DocuTest.xcworkspace -scheme 'DocuTest' -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (2nd generation)' | xcpretty -c
+- set -o pipefail && xcodebuild -workspace DocuTest.xcworkspace -scheme 'DocuTest'
+  -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (2nd generation)'
+  | xcpretty -c
 - fastlane screenshots
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  local-dir: fastlane/screenshots
+  on:
+    branch: master
+env:
+  deploy:
+    secure: rgr8M7yRpu9KG8wqi2z8InpCPu8P9oaRWVnQSVkp9ET7Ps2MTkWHYVZyQ/sgQ7DS4R1Gph01wwfirrKNTSH7SpvhPX2rq63C/wS4Xu1gWMK7NxncuGh003KSKQ+UaBxbiunvKV3XYkGw00BcV088xLWnvwXBjnLE9asQcUpfxHIOGmoWBraw1nzIGLlQEfUhZ9vwIuHKV+GF35IVYqjD5wQOsJh4NXGT4lfycyhy9SqPG8s0JphSzdw7TO0Pj9psWjpXGEWJ4y7g/FcDAnF8/nZj83yEsSUmAgF39Xf37Z6R/6uc0ggjn3NDMad3fmN/gTsqK/vPs6DK3Uos6MEVGn0lMAHKfp1IMx4NYEuD+PQwG/UF8SlD/kM4DBmTX6FpNd5GROEPzg9GgvzVQC3D0EETlFxxl8IIX2IGrnwzBvjH7M4DG5bjhOjeT0L/tDarLygQDEn4/ucO5xzOxSVBWyfDnItaryOVY2uVDKFJGj+U/8v2GID0h694hCPA7+k0JdnGtA67+XxtyxpNVpvP6iq2MNhfOnQgF6BsGMoYXARwRM6JCnl+ecCFoLkCKwBulwF3aCBqQSS02NRZpwHTBt4Ft5Is4IM3H+K7rOYGY/SqODRlUjjFtd9adOm8VWYtuoeUsBcetZA49//lIzdUELBmV2z1VRrgvzqs8TZQAJI=

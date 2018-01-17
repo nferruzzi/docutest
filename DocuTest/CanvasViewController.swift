@@ -10,12 +10,21 @@ import UIKit
 import SnapKit
 import MobileCoreServices
 
+public enum CanvasGuideViewGesture {
+    case none
+    case drag
+    case resize
+}
+
 class CanvasGuideView: UIView {
     // DO NOT SET THE BACKGROUNDCOLOR
     var borderColor = UIColor.blue
     var borderWidth: CGFloat = 2.0
     var controlSize: CGFloat = 15.0
-    lazy var controlLayers = {
+    private var moveSize: CGSize!
+    private var movePoint: CGPoint!
+    private var gesture: CanvasGuideViewGesture = .none
+    private lazy var controlLayers = {
         [CALayer.init(), CALayer.init(), CALayer.init()]
     }()
 
@@ -23,19 +32,30 @@ class CanvasGuideView: UIView {
         super.init(frame: frame)
         isOpaque = false
         clipsToBounds = false
+        isUserInteractionEnabled = true
+        translatesAutoresizingMaskIntoConstraints = false
+        backgroundColor = .clear
 
         for cl in controlLayers {
             cl.anchorPoint = CGPoint.init(x: 0.5, y: 0.5)
             cl.bounds = CGRect.init(x: 0, y: 0, width: controlSize, height: controlSize)
             cl.backgroundColor = UIColor.purple.cgColor
+            cl.needsDisplayOnBoundsChange = true
             layer.addSublayer(cl)
         }
+
+        let gesture = UIPanGestureRecognizer(target: self, action: #selector(CanvasGuideView.wasDragged(_:)))
+        addGestureRecognizer(gesture)
+        gesture.delegate = self
     }
 
     override func layoutSublayers(of layer: CALayer) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         controlLayers[0].position = CGPoint.init(x: 0.0, y: frame.size.height)
         controlLayers[1].position = CGPoint.init(x: frame.size.width/2.0, y: frame.size.height)
         controlLayers[2].position = CGPoint.init(x: frame.size.width, y: frame.size.height)
+        CATransaction.commit()
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -52,6 +72,43 @@ class CanvasGuideView: UIView {
 
 }
 
+// MARK: - Pan delegate
+extension CanvasGuideView: UIGestureRecognizerDelegate {
+
+    @objc func wasDragged(_ gestureRecognizer: UIPanGestureRecognizer) {
+        switch gestureRecognizer.state {
+        case .began:
+            let p = gestureRecognizer.location(ofTouch: 0, in: self)
+            switch p.y {
+            case let y where y > (frame.size.height - 30.0):
+                moveSize = frame.size
+                gesture = .resize
+            default:
+                movePoint = superview!.frame.origin
+                gesture = .drag
+            }
+        case .changed:
+            let translation = gestureRecognizer.translation(in: superview)
+            switch gesture {
+            case .none: ()
+            case .drag:
+                superview!.snp.updateConstraints({ (make) in
+                    make.left.equalTo(max(movePoint.x + translation.x, 0.0))
+                    make.top.equalTo(max(movePoint.y + translation.y, 0.0))
+                })
+            case .resize:
+                superview!.snp.updateConstraints({ (make) in
+                    make.width.equalTo(max(moveSize.width + translation.x, 0.0))
+                    make.height.equalTo(max(moveSize.height + translation.y, 0.0))
+                })
+            }
+        default: ()
+        }
+    }
+
+}
+
+// MARK: - Canvas View, contains the board
 class CanvasItem: UIView {
 
     private weak var guideView: UIView!
@@ -65,16 +122,12 @@ class CanvasItem: UIView {
         }
     }
     private var canvasScrollView: CanvasScrollView!
-    private var moveDelta: CGPoint!
 
     init() {
         super.init(frame: .zero)
         isOpaque = false
         backgroundColor = .red
         let gv = CanvasGuideView.init(frame: CGRect.zero)
-        gv.translatesAutoresizingMaskIntoConstraints = false
-        gv.isUserInteractionEnabled = false
-        gv.backgroundColor = .clear
         super.addSubview(gv)
         guideView = gv
         guideView.snp.makeConstraints { (make) in
@@ -86,10 +139,6 @@ class CanvasItem: UIView {
 
 //        let dragInteraction = UIDragInteraction(delegate: self)
 //        addInteraction(dragInteraction)
-
-        let gesture = UIPanGestureRecognizer(target: self, action: #selector(CanvasItem.wasDragged(_:)))
-        addGestureRecognizer(gesture)
-        gesture.delegate = self
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -116,25 +165,6 @@ class CanvasItem: UIView {
 
     @objc func onTap(_ gesture: UITapGestureRecognizer) {
         selected = selected ? false : true
-    }
-
-}
-
-// MARK: - Pan delegate
-extension CanvasItem: UIGestureRecognizerDelegate {
-
-    @objc func wasDragged(_ gestureRecognizer: UIPanGestureRecognizer) {
-        switch gestureRecognizer.state {
-        case .began:
-            moveDelta = frame.origin
-        case .changed:
-            let translation = gestureRecognizer.translation(in: superview)
-            snp.updateConstraints({ (make) in
-                make.left.equalTo(max(moveDelta.x + translation.x, 0.0))
-                make.top.equalTo(max(moveDelta.y + translation.y, 0.0))
-            })
-        default: ()
-        }
     }
 
 }

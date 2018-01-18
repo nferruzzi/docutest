@@ -16,6 +16,7 @@ jobs:
     steps:
       - checkout
       - run: bundle install
+      - run: pod install
       - run:
           name: Fastlane
           command: bundle exec fastlane $FASTLANE_LANE

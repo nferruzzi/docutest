@@ -13,7 +13,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         return true
@@ -44,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ app: UIApplication, open inputURL: URL, options: [UIApplicationOpenURLOptionsKey : Any] = [:]) -> Bool {
         // Ensure the URL is a file URL
         guard inputURL.isFileURL else { return false }
-                
+
         // Reveal / import the document at the URL
         guard let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController else { return false }
 
@@ -54,7 +53,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("Failed to reveal the document at URL \(inputURL) with error: '\(error)'")
                 return
             }
-            
+
             // Present the Document View Controller for the revealed URL
             documentBrowserViewController.presentDocument(at: revealedDocumentURL!)
         }
@@ -62,6 +61,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-
 }
-

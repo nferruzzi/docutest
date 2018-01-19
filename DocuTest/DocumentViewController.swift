@@ -10,9 +10,9 @@ import UIKit
 import SnapKit
 
 class DocumentViewController: UIViewController {
-    
+
     @IBOutlet weak var documentNameLabel: UILabel!
-    
+
     var document: UIDocument?
 
     override func viewWillAppear(_ animated: Bool) {
@@ -56,7 +56,7 @@ class DocumentViewController: UIViewController {
         view.addSubview(rightContainer)
 
         leftContainer.snp.makeConstraints { (make) -> Void in
-            make.width.equalTo(50.0)
+            make.width.equalTo(100.0)
             make.top.equalTo(view.snp.top)
             make.bottom.equalTo(view.snp.bottom)
             make.left.equalTo(view.snp.left)

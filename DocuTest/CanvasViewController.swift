@@ -151,7 +151,7 @@ class CanvasItem: UIView {
 
     override func didMoveToSuperview() {
         var sp = superview
-        while !(sp is CanvasScrollView) && sp != nil{
+        while !(sp is CanvasScrollView) && sp != nil {
             sp = sp?.superview
         }
         if let sp = sp as? CanvasScrollView {
@@ -225,7 +225,7 @@ class CanvasViewController: UIViewController {
         scrollView.maximumZoomScale = 5.0
         contentView = UIView.init()
         contentView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addSubview(contentView);
+        scrollView.addSubview(contentView)
         contentView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
             make.width.equalTo(2000)
@@ -369,7 +369,7 @@ extension CanvasViewController: UIDropInteractionDelegate {
             let (view, size) = lo.createCanvasView()
             add(view: view, location: dropLocation, size: size)
         default:
-            session.loadObjects(ofClass: UIImage.self){ [weak self](imageItems) in
+            session.loadObjects(ofClass: UIImage.self) { [weak self](imageItems) in
                 guard let wself = self else { return }
                 DispatchQueue.main.async {
                     let images = imageItems as! [UIImage]

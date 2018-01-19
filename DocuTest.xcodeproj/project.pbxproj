@@ -215,6 +215,7 @@
 				8A68C12F1FFBEF9F001F4E70 /* Resources */,
 				4E8EA4A5DF81DD5EB6F6AD3B /* [CP] Embed Pods Frameworks */,
 				672C741C13E23BA55FCCFBFE /* [CP] Copy Pods Resources */,
+				8A7597012012432200355F8F /* Swiftlint */,
 			);
 			buildRules = (
 			);
@@ -475,6 +476,20 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DocuTestTests/Pods-DocuTestTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		8A7597012012432200355F8F /* Swiftlint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = Swiftlint;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/SwiftLint/swiftlint\" autocorrect";
 		};
 		A5EAB3390D4095F2F03D3C17 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;

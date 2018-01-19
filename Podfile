@@ -7,7 +7,8 @@ target 'DocuTest' do
 
   # Pods for DocuTest
   pod 'SnapKit', '~> 4.0.0'
-
+  pod 'SwiftLint'
+  
   target 'DocuTestTests' do
     inherit! :search_paths
     # Pods for testing

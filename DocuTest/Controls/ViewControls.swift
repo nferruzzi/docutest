@@ -40,7 +40,7 @@ class ControlButtonView: DraggabeViewControl<UIButton> {
         return "MKButton_drag"
     }
 
-    override func configure(view: UIButton)  -> CGSize? {
+    override func configure(view: UIButton) -> CGSize? {
         view.setTitle("Button", for: .normal)
         return nil
     }

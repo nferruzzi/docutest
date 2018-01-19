@@ -156,7 +156,7 @@ class CanvasItem: UIView {
         }
         if let sp = sp as? CanvasScrollView {
             canvasScrollView = sp
-            token = sp.observe(\.zoomScaleDelegate, options: [.new, .initial]) { [weak self](scrollView: CanvasScrollView, _) in
+            token = sp.observe(\.canvasZoomScale, options: [.new, .initial]) { [weak self](_: CanvasScrollView, _) in
                 guard let wself = self else { return }
                 wself.selected = wself.selected ? true : false
             }
@@ -199,7 +199,7 @@ extension CanvasItem: UIDragInteractionDelegate {
 
 // MARK: CanvasViewController and CanvasScrollView child
 class CanvasScrollView: UIScrollView {
-    @objc dynamic var zoomScaleDelegate: NSNumber?
+    @objc dynamic var canvasZoomScale: NSNumber?
 }
 
 class CanvasViewController: UIViewController {
@@ -319,7 +319,7 @@ extension CanvasViewController: UIScrollViewDelegate {
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         guard let csv = scrollView as? CanvasScrollView else { return }
-        csv.zoomScaleDelegate = NSNumber.init(value: Float(scrollView.zoomScale))
+        csv.canvasZoomScale = NSNumber.init(value: Float(scrollView.zoomScale))
     }
 
 }
@@ -372,7 +372,7 @@ extension CanvasViewController: UIDropInteractionDelegate {
             session.loadObjects(ofClass: UIImage.self) { [weak self](imageItems) in
                 guard let wself = self else { return }
                 DispatchQueue.main.async {
-                    let images = imageItems as! [UIImage]
+                    guard let images = imageItems as? [UIImage] else { return }
                     for image in images {
                         let iv = UIImageView.init(image: image)
                         let location = CGPoint.init(x: dropLocation.x - image.size.width/2, y: dropLocation.y - image.size.height/2)
